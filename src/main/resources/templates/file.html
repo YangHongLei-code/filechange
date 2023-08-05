@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+   <style>
+
+
+   </style>
+</head>
+<body>
+<form action="http://192.168.1.8:8080/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" value="请选择文件">
+    <input type="submit" value="上传">
+</form>
+
+<script>
+    var ip="192.168.1.8";
+    filelist();
+
+    function filelist(path) {
+        if(!path){
+            var body=document.getElementsByTagName("body");
+            body[0].innerHTML=body[0].innerHTML+"<table id=\"list\"></table>";
+        }else {
+            var body=document.getElementsByTagName("body");
+            body[0].innerHTML="<table id=\"list\"></table>";
+        }
+
+
+        var xmlRequest = new XMLHttpRequest();
+        xmlRequest.open("POST", "http://"+ip+":8080/filelist", true);
+        xmlRequest.setRequestHeader("Content-type", "application/text");
+        xmlRequest.responseType = "json";
+        xmlRequest.onload = function () {
+
+            if(xmlRequest.status == 200 ) {
+
+                var files = xmlRequest.response;
+                var list=document.getElementById("list");
+                for (var i = 0; i < files.length ; i++) {
+                    var map=files[i];
+
+                    var tr=document.createElement("tr");
+
+                    var td=document.createElement("td");
+
+                    if(map.flag=="true"){
+                        td.innerHTML="<img src=\"folder.jpg\" width=\"32\" height=\"32\">";
+                    }else {
+                        td.innerHTML="<img src=\"file.jpg\" width=\"32\" height=\"32\">";
+                    }
+                    var td1=document.createElement("td");
+                    td1.innerText=map.path;
+                    var td2=document.createElement("td");
+
+                    if(map.flag=="true"){
+                        td2.innerHTML="<button onclick=filelist(\""+map.path+"\")>打开</button>";
+                    }else {
+                        td2.innerHTML="<button onclick=download(\""+map.path+"\")>下载</button>";
+                    }
+
+
+                    tr.appendChild(td);
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+
+
+                    list.appendChild(tr);
+
+                }
+
+
+            } else {
+                alert('获取文件列表失败');
+            }
+
+
+        };
+        if(path){
+            xmlRequest.send(path);
+        }else {
+            xmlRequest.send("/home/yhl/下载");
+
+        }
+    }
+
+
+
+
+    function download(fileName) {
+
+        var xmlRequest = new XMLHttpRequest();
+        xmlRequest.open("POST", "http://"+ip+":8080/download", true);
+        xmlRequest.setRequestHeader("Content-type", "application/text");
+        xmlRequest.responseType = "blob";
+        xmlRequest.onload = function () {
+            console.log(xmlRequest.status);
+            if((xmlRequest.status >= 200 && xmlRequest.status < 300) || xmlRequest.status === 304) {
+                if(!fileName) {
+                    alert(xmlRequest.getResponseHeader('filename'));
+                    fileName = decodeURI(xmlRequest.getResponseHeader('filename'));
+                }
+
+              } else {
+                alert('下载失败');
+            }
+            var content = xmlRequest.response;
+            var elink = document.createElement('a');
+            elink.download = fileName || 'undifined';
+            elink.style.display = 'none';
+            var blob = new Blob([content]);
+            elink.href = URL.createObjectURL(blob);
+            console.log(URL.createObjectURL(blob))
+            document.body.appendChild(elink);
+            elink.click();
+            document.body.removeChild(elink);
+
+        };
+        xmlRequest.send(fileName+"");
+    }
+
+</script>
+</body>
+</html>
