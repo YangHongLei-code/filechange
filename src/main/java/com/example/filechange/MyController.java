@@ -14,6 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -24,6 +27,32 @@ public class MyController {
     @RequestMapping("/")
     public String html() {
         return "/file";
+    }
+    @RequestMapping("/ip")
+    @ResponseBody
+    public String ip() {
+        try {
+            Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+            InetAddress ip = null;
+            while (allNetInterfaces.hasMoreElements()) {
+                NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+                if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
+                    continue;
+                } else {
+                    Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        ip = addresses.nextElement();
+                        if (ip != null && ip instanceof Inet4Address) {
+                            return ip.getHostAddress();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("IP地址获取失败" + e.toString());
+        }
+        System.out.println("ffffff");
+        return "localhost";
     }
     @RequestMapping("/filelist")
     @ResponseBody
@@ -94,7 +123,7 @@ public class MyController {
     }
 
     @RequestMapping("/upload")
-    public String upload(MultipartFile file, HttpServletRequest req){
+    public void upload(MultipartFile file, HttpServletResponse response) throws IOException {
         String name=file.getOriginalFilename();
 
         File file1=new File("/home/yhl/下载/"+name);
@@ -111,6 +140,6 @@ public class MyController {
             e.printStackTrace();
         }
 
-        return "/file";
+        response.sendRedirect("/");
     }
 }
