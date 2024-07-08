@@ -26,7 +26,7 @@ import java.util.*;
 public class MyController {
     @RequestMapping("/")
     public String html() {
-        return "/file";
+        return "/file1";
     }
     @RequestMapping("/ip")
     @ResponseBody
@@ -124,9 +124,10 @@ public class MyController {
 
     @RequestMapping("/upload")
     public void upload(MultipartFile file, HttpServletResponse response) throws IOException {
+        String path="/app/";
         String name=file.getOriginalFilename();
 
-        File file1=new File("/home/yhl/下载/"+name);
+        File file1=new File(path+name);
         if (file1.exists()){
             UUID uuid = UUID.randomUUID();
             name=name+uuid.toString();
@@ -134,7 +135,7 @@ public class MyController {
 
         try {
         byte [] bytes = file.getBytes();
-        OutputStream out = new FileOutputStream("/home/yhl/下载/"+name);
+        OutputStream out = new FileOutputStream(path+name);
         out.write(bytes);
         } catch (IOException e) {
             e.printStackTrace();

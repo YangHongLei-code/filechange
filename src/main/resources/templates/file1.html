@@ -3,20 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-   <style>
+    <link rel="shortcut icon" href="#"/>
 
-
-   </style>
 </head>
 <body>
-<form action="http://192.168.0.153:8080/upload" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" value="请选择文件">
-    <input type="submit" value="上传">
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <input id="choosefile" type="file" name="file" value="请选择文件">
+    <input type="button" onclick="mysubmit()" value="上传">
 </form>
 
 <script>
-    var ip="192.168.0.153";
-    filelist();
+    var ip="000.192.168.0.153:8080";//默认ip
+    init();
+    function init() {
+        ip=window.location.host;// 	URL 的主机（IP 地址或域名）和端口号。
+        filelist();
+    }
+
+    function mysubmit(){
+        var fileInput = document.getElementById("choosefile").files[0];
+        console.info(fileInput);
+        if(fileInput){
+            document.forms[0].submit();
+        }else{
+            alert("请选择上传文件！");
+        }
+    }
 
     function filelist(path) {
         if(!path){
@@ -29,7 +41,7 @@
 
 
         var xmlRequest = new XMLHttpRequest();
-        xmlRequest.open("POST", "http://"+ip+":8080/filelist", true);
+        xmlRequest.open("POST", "http://"+ip+"/filelist", true);
         xmlRequest.setRequestHeader("Content-type", "application/text");
         xmlRequest.responseType = "json";
         xmlRequest.onload = function () {
@@ -64,12 +76,9 @@
                     tr.appendChild(td);
                     tr.appendChild(td1);
                     tr.appendChild(td2);
-
-
                     list.appendChild(tr);
 
                 }
-
 
             } else {
                 alert('获取文件列表失败');
@@ -80,8 +89,7 @@
         if(path){
             xmlRequest.send(path);
         }else {
-            xmlRequest.send("/home/yhl/下载");
-
+            xmlRequest.send("/app");
         }
     }
 
@@ -91,7 +99,7 @@
     function download(fileName) {
 
         var xmlRequest = new XMLHttpRequest();
-        xmlRequest.open("POST", "http://"+ip+":8080/download", true);
+        xmlRequest.open("POST", "http://"+ip+"/download", true);
         xmlRequest.setRequestHeader("Content-type", "application/text");
         xmlRequest.responseType = "blob";
         xmlRequest.onload = function () {
@@ -102,7 +110,7 @@
                     fileName = decodeURI(xmlRequest.getResponseHeader('filename'));
                 }
 
-              } else {
+            } else {
                 alert('下载失败');
             }
             var content = xmlRequest.response;
@@ -118,6 +126,7 @@
 
         };
         xmlRequest.send(fileName+"");
+
     }
 
 </script>

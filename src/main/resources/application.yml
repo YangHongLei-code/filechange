@@ -6,3 +6,9 @@ spring:
     multipart:
       maxFileSize: 500MB
       maxRequestSize: 500MB
+  thymeleaf:
+    prefix: classpath:/templates  #所有的动态页面打包后的位置
+    suffix: .html  #添加后缀
+
+
+
